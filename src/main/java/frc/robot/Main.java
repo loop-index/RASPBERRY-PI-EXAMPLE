@@ -14,7 +14,7 @@ package frc.robot;
   - Save (nhớ chọn option Writable ở trên cùng màn hình)
   - Mở tab Vision Settings
   - Chọn option "Add Other Camera" > Add Switched Camera
-  - Nhập tên của OutputStream (mở class Vision ra xem) vào mục name rồi nhấn open stream
+  - Nhập tên của OutputStream (mở class Vision ra xem) vào mục name rồi save và nhấn open stream
   - Nó sẽ mở tab mới có stream (đã qua xử lý) về, nếu k được thì cứ refresh vài lần
 */
 
