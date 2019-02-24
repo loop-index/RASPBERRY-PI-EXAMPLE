@@ -19,13 +19,32 @@ import org.opencv.imgproc.Imgproc;
 import edu.wpi.cscore.CvSink;
 import edu.wpi.cscore.CvSource;
 import edu.wpi.first.cameraserver.*;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 
 /**
  *	Đây là code của bọn mài, đã gỡ ra khỏi thread và loop và cho vào method cho dễ gọi.
  */
-public class SS_Vision{
+
+public class SS_Vision {
 
 	public Thread m_visionThread;
+	
+	public void vision() {
+		m_visionThread = new Thread(() -> {
+		});
+		m_visionThread.setDaemon(true);
+		m_visionThread.start();
+	}
+
+	//khởi tạo table từ client và tạo một số entry
+	NetworkTable RPi = Main.ntinst.getTable("/Raspberry Pi");
+	//entry có key là "X" và "Y"
+	NetworkTableEntry xEntry = RPi.getEntry("X");
+	NetworkTableEntry yEntry = RPi.getEntry("Y");
+
+	//------------
+
 	double centerX = 0, centerY = 0;
 	public double averageSize;
 	boolean centered;
@@ -33,14 +52,6 @@ public class SS_Vision{
 	
 	public double coeff = 1;
 	public double olddistance = 0;
-	
-	//không dùng 
-	public void vision() {
-		m_visionThread = new Thread(() -> {
-		});
-		m_visionThread.setDaemon(true);
-		m_visionThread.start();
-	}
 
 	CvSink cvSink = CameraServer.getInstance().getVideo();
 	//chú ý cái tên của cái outputstream này ("RPi") để đặt cho đúng trong RPi dashboard
@@ -93,45 +104,45 @@ public class SS_Vision{
 		Imgproc.findContours(mat, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_NONE);
 
 		if (!paused){
-		for (int i = 0; i < contours.size(); i++) {
+			for (int i = 0; i < contours.size(); i++) {
 
-			Rect newrect = Imgproc.boundingRect(contours.get(i));
-			if (newrect.size().area() > 100){
-				boundingrect.add(newrect);
-			}
-
-			MatOfPoint2f dst = new MatOfPoint2f();  
-			contours.get(i).convertTo(dst, CvType.CV_32F);
-
-			RotatedRect rect = Imgproc.minAreaRect(dst);
-			if (rect.size.area() > 100){
-					boundRect.add(rect);
-					Imgproc.putText(mat, Math.round(rect.angle)+"", new Point(rect.center.x, rect.center.y-30), 0 , 0.5 , new Scalar(255,255,255));
-					Imgproc.putText(mat, Math.round(rect.size.area())+"", new Point(rect.center.x, rect.center.y+50), 0 , 0.5 , new Scalar(255,255,255));
-					Imgproc.putText(mat, Math.round(rect.center.x)+"", new Point(rect.center.x, rect.center.y+80), 0 , 0.5 , new Scalar(255,255,255));							
-					// Imgproc.putText(mat, i+"", new Point(Imgproc.minAreaRect(dst).center.x,Imgproc.minAreaRect(dst).center.y-80), 0 , 0.5 , new Scalar(255,255,255));
+				Rect newrect = Imgproc.boundingRect(contours.get(i));
+				if (newrect.size().area() > 100){
+					boundingrect.add(newrect);
 				}
-			}
 
-		//sort by x
-		for (int i = boundRect.size(); i > 0; i--){
-			// Imgproc.putText(mat, i - 1 + "", new Point(boundRect.get(i - 1).center.x,boundRect.get(i - 1).center.y-50), 0 , 0.5 , new Scalar(255,255,255));
-			
-			for (int j = 0; j < i - 1; j++){
-				if (boundRect.get(j).center.x > boundRect.get(j + 1).center.x){
-					RotatedRect mid = boundRect.get(j);
-					boundRect.set(j, boundRect.get(j + 1));
-					boundRect.set(j + 1, mid);	
-				}
-				if (boundingrect.get(j).x > boundingrect.get(j+1).x){
-					Rect middle = boundingrect.get(j);
-					boundingrect.set(j, boundingrect.get(j + 1));
-					boundingrect.set(j + 1, middle);
-				}
-			}
-		}	
+				MatOfPoint2f dst = new MatOfPoint2f();  
+				contours.get(i).convertTo(dst, CvType.CV_32F);
 
-		for (int i = 0; i < boundRect.size() - 1; i++) {
+				RotatedRect rect = Imgproc.minAreaRect(dst);
+				if (rect.size.area() > 100){
+						boundRect.add(rect);
+						Imgproc.putText(mat, Math.round(rect.angle)+"", new Point(rect.center.x, rect.center.y-30), 0 , 0.5 , new Scalar(255,255,255));
+						Imgproc.putText(mat, Math.round(rect.size.area())+"", new Point(rect.center.x, rect.center.y+50), 0 , 0.5 , new Scalar(255,255,255));
+						Imgproc.putText(mat, Math.round(rect.center.x)+"", new Point(rect.center.x, rect.center.y+80), 0 , 0.5 , new Scalar(255,255,255));							
+						// Imgproc.putText(mat, i+"", new Point(Imgproc.minAreaRect(dst).center.x,Imgproc.minAreaRect(dst).center.y-80), 0 , 0.5 , new Scalar(255,255,255));
+					}
+				}
+
+			//sort by x
+			for (int i = boundRect.size(); i > 0; i--){
+				// Imgproc.putText(mat, i - 1 + "", new Point(boundRect.get(i - 1).center.x,boundRect.get(i - 1).center.y-50), 0 , 0.5 , new Scalar(255,255,255));
+				
+				for (int j = 0; j < i - 1; j++){
+					if (boundRect.get(j).center.x > boundRect.get(j + 1).center.x){
+						RotatedRect mid = boundRect.get(j);
+						boundRect.set(j, boundRect.get(j + 1));
+						boundRect.set(j + 1, mid);	
+					}
+					if (boundingrect.get(j).x > boundingrect.get(j+1).x){
+						Rect middle = boundingrect.get(j);
+						boundingrect.set(j, boundingrect.get(j + 1));
+						boundingrect.set(j + 1, middle);
+					}
+				}
+			}	
+
+			for (int i = 0; i < boundRect.size() - 1; i++) {
 				if (boundRect.get(i).angle < boundRect.get(i+1).angle && Math.round(boundRect.get(i).angle)!=-90.00) {
 					centerX = Math.round((boundRect.get(i).center.x+boundRect.get(i+1).center.x)/2);
 					centerY = Math.round((boundRect.get(i).center.y+boundRect.get(i+1).center.y)/2);
@@ -155,12 +166,19 @@ public class SS_Vision{
 				if (!centered){
 					averageSize = -1;
 				}
+			}
 		}
-		}
+
 		else {
 			averageSize = -1;
 		}
+
+		//đưa giá trị vào entry
+		xEntry.setNumber(centerX_final);
+		yEntry.setNumber(centerY_final);
+
 		outputStream.putFrame(mat);
+
 		return 1;
 		}
 	}

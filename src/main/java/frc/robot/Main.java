@@ -4,7 +4,6 @@ package frc.robot;
 /*
   Khi tạo project mới để tải lên Raspberry Pi thì cứ tạo một robot project rồi sửa các file trong đấy để được
   ăn sẵn mấy cái thư viện wpilib và opencv và gradle luôn
-
   Cách upload lên RaspPi:
   - Save tất cả các class để đảm bảo k compile error
   - Mở terminal, gõ .\gradlew clean, chờ build success, gõ .\gradlew build, chờ build success
@@ -14,7 +13,7 @@ package frc.robot;
   - Save (nhớ chọn option Writable ở trên cùng màn hình)
   - Mở tab Vision Settings
   - Chọn option "Add Other Camera" > Add Switched Camera
-  - Nhập tên của OutputStream (mở class Vision ra xem) vào mục name rồi nhấn open stream
+  - Nhập tên của OutputStream (mở class Vision ra xem) vào mục name rồi save và nhấn open stream
   - Nó sẽ mở tab mới có stream (đã qua xử lý) về, nếu k được thì cứ refresh vài lần
 */
 
@@ -24,10 +23,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class Main {
   //main class cho những ai chưa quên mất main là gì
+  
+  //khởi tạo NetworkTables client, sẽ dùng đến sau để đưa các kết quả tính toán về RoboRIO xử lý.
+  static NetworkTableInstance ntinst = NetworkTableInstance.getDefault();
   public static void main(String[] args) {
 
-    //khởi tạo NetworkTables client, sẽ dùng đến sau để đưa các kết quả tính toán về RoboRIO xử lý.
-    NetworkTableInstance ntinst = NetworkTableInstance.getDefault();
     System.out.println("Setting up NetworkTables client for team " + 6520);
     ntinst.startClientTeam(6520);
 
